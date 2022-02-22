@@ -15,7 +15,7 @@ from .models import Question
 class QuestionModelTest(TestCase):
 
     def test_was_published_recently_with_future_questions(self):
-        """was_published_recently returns False for questions whose
+        """was_published_recently() returns False for questions whose
         pub_date is in the future"""
         time = timezone.now() + datetime.timedelta(days=30)
         future_question = Question(
@@ -25,7 +25,7 @@ class QuestionModelTest(TestCase):
         self.assertFalse(future_question.was_published_recently())
 
     def test_was_published_recently_with_past_questions(self):
-        """was_published_recently returns False for questions whose
+        """was_published_recently() returns False for questions whose
         pub_date is more than 1 day in the past and True in the other
         case"""
         true_time = timezone.now() - datetime.timedelta(
@@ -45,8 +45,8 @@ class QuestionModelTest(TestCase):
         self.assertFalse(false_question.was_published_recently())
 
     def test_was_published_recently_with_present_questions(self):
-        """was_published_recently returns False for questions whose
-        pub_date is in the future"""
+        """was_published_recently() returns True for questions whose
+        pub_date is in the present"""
         time = timezone.now()
         question = Question(
             question_text="Wich is your favorite course?",
@@ -79,8 +79,43 @@ class QuestionIndexViewTests(TestCase):
     def test_questions_with_future_pub_date(self):
         """Questions with date greater to timezone.now shouldn't be
         displayed"""
-        future_question = create_question("This is a Question for the test", 1)
+        future_question = create_question("Future Question", 1)
         response = self.client.get(reverse('polls:index'))
         self.assertNotIn(
             future_question,
+            response.context['latest_question_list'])
+
+    def test_questions_with_past_pub_date(self):
+        """Questions with date greater to timezone.now shouldn't be
+        displayed"""
+        question = create_question("Past Question", -1)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            [question],
+            response.context['latest_question_list'])
+
+    def test_future_question_and_past_question(self):
+        """Even if both (past and future) question exists, only past
+        questions are displayed"""
+        past_question = create_question(
+            question_text="Past Question",
+            days=-1)
+        future_question = create_question(
+            question_text="Future Question",
+            days=1)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            [past_question],
+            response.context['latest_question_list'])
+        self.assertNotIn(
+            future_question,
+            response.context['latest_question_list'])
+
+    def test_two_past_questions(self):
+        """The questions index page may display multiple questions"""
+        past_question1 = create_question(question_text="Question 1", days=-1)
+        past_question2 = create_question(question_text="Question 2", days=-1)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            [past_question2, past_question1],
             response.context['latest_question_list'])
