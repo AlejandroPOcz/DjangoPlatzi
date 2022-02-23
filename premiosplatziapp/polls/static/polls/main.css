@@ -4,7 +4,7 @@ body {
     justify-content: center;
 
     height: 100vh;
-    background: hsl(204 100% 5%);
+    background-color: hsl(204 100% 5%);
     font-family: Arial, Helvetica, sans-serif;
     flex-direction: column;
 }
@@ -19,7 +19,7 @@ header {
 
     height: 60px;
     font-size: 72px;
-    color: #71632d;
+    color: red;
 }
 
 ul {
@@ -32,7 +32,7 @@ ul {
 header, ul {
     background: linear-gradient(
         to right,
-        hsl(98 100% 62%)
+        hsl(98 100% 62%),
         hsl(204 100% 59%)
     );
     -webkit-background-clip: text;
