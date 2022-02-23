@@ -2,6 +2,7 @@
 
 # Utils
 import datetime
+from random import choices
 from urllib import response
 
 # Django
@@ -13,7 +14,39 @@ from django.urls.base import reverse
 from .models import Question, Choice
 
 
-class QuestionModelTest(TestCase):
+def create_question(question_text, days):
+    """Create a question with the given question_text and published
+    the given number of days offset to now
+
+    Args:
+        question_text (str): Text of the question
+        days (int): Negative for questions published in the past
+    """
+    time = timezone.now() + datetime.timedelta(days=days)
+    return Question.objects.create(
+        pub_date=time,
+        question_text=question_text)
+
+
+def create_choices(question, choice1=1, choice2=10):
+    """Create 2 choices with defaults 1 and 10 votes for a given question
+    
+    Args:
+        question (Question): An instance of a question
+        choice1 (int): Number of votes for choice1 (default 1)
+        choice2 (int): Number of votes for choice2 (default 1o)
+    """
+    Choice.objects.create(
+        question=question,
+        choice_text="Choice 1",
+        votes=choice1)
+    Choice.objects.create(
+        question=question,
+        choice_text="Choice 2",
+        votes=choice2)
+
+
+class QuestionModelTests(TestCase):
 
     def test_was_published_recently_with_future_questions(self):
         """was_published_recently() returns False for questions whose
@@ -53,38 +86,9 @@ class QuestionModelTest(TestCase):
             question_text="Wich is your favorite course?",
             pub_date=time)
         self.assertTrue(question.was_published_recently())
-
-
-def create_question(question_text, days):
-    """Create a question with the given question_text and published
-    the given number of days offset to now
-
-    Args:
-        question_text (str): Text of the question
-        days (int): Negative for questions published in the past
-    """
-    time = timezone.now() + datetime.timedelta(days=days)
-    return Question.objects.create(
-        pub_date=time,
-        question_text=question_text)
-
-
-def create_choices(question, choice1=1, choice2=10):
-    """Create 2 choices with defaults 1 and 10 votes for a given question
     
-    Args:
-        question (Question): An instance of a question
-        choice1 (int): Number of votes for choice1 (default 1)
-        choice2 (int): Number of votes for choice2 (default 1o)
-    """
-    Choice.objects.create(
-        question=question,
-        choice_text="Choice 1",
-        votes=choice1)
-    Choice.objects.create(
-        question=question,
-        choice_text="Choice 2",
-        votes=choice2)
+    def test_unable_to_create_question_without_choices(self):
+        pass
 
 
 class QuestionIndexViewTests(TestCase):
