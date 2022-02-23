@@ -2,8 +2,6 @@
 
 # Utils
 import datetime
-from random import choices
-from urllib import response
 
 # Django
 from django.test import TestCase
